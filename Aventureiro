@@ -1,0 +1,156 @@
+#include <stdio.h>    // Biblioteca para entrada e saída (ex: printf, scanf)
+#include <stdlib.h>   // Biblioteca para funções como rand() e srand()
+#include <time.h>     // Biblioteca para usar o tempo atual (para números aleatórios)
+#include <string.h>   // Biblioteca para trabalhar com textos (strings)
+
+// Definimos quantas cidades e atributos o jogo tem
+#define TOTAL_CIDADES 8
+#define TOTAL_ATRIBUTOS 5
+
+// Estrutura que define os dados de uma cidade
+typedef struct {
+    char nome[30];
+    char estado[30];
+    int populacao;       // População em mil habitantes
+    float area;          // Área em km²
+    float pib;           // PIB per capita em mil reais
+    int pontosTuristicos;
+    float densidade;     // Densidade = população / área
+} Cidade;
+
+// Mostra os atributos disponíveis para o jogador escolher
+void mostrarAtributosDisponiveis() {
+    printf("1 - População\n");
+    printf("2 - Área (em km²)\n");
+    printf("3 - PIB per capita (em mil reais)\n");
+    printf("4 - Pontos Turísticos\n");
+    printf("5 - Densidade Demográfica (hab/km²)\n");
+}
+
+int main() {
+    // Lista das 8 cidades usadas no jogo
+    Cidade cidades[TOTAL_CIDADES] = {
+        {"São Paulo", "São Paulo", 11451, 1521, 3.5, 10, 0},
+        {"Rio de Janeiro", "Rio de Janeiro", 6211, 1255, 950, 10, 0},
+        {"Salvador", "Bahia", 13184, 693, 400, 10, 0},
+        {"Porto Alegre", "Rio Grande do Sul", 1332, 497, 520, 10, 0},
+        {"Curitiba", "Paraná", 1961, 434, 430, 9, 0},
+        {"Recife", "Pernambuco", 1660, 218, 390, 8, 0},
+        {"Fortaleza", "Ceará", 2682, 314, 350, 7, 0},
+        {"Belo Horizonte", "Minas Gerais", 2520, 331, 420, 8, 0}
+    };
+
+    // Calcula a densidade populacional de cada cidade
+    for (int i = 0; i < TOTAL_CIDADES; i++) {
+        cidades[i].densidade = (float)cidades[i].populacao / cidades[i].area;
+    }
+
+    // Inicializa gerador de números aleatórios
+    srand(time(NULL));
+
+    int escolhaJogador, escolhaComputador;
+
+    printf("🎮 Bem-vindo ao Super Trunfo de Cidades!\n\n");
+
+    // Mostra todas as cartas disponíveis para o jogador
+    printf("Escolha a sua carta entre as cidades abaixo:\n\n");
+    for (int i = 0; i < TOTAL_CIDADES; i++) {
+        printf("%d - %s (%s)\n", i + 1, cidades[i].nome, cidades[i].estado);
+    }
+
+    // Pergunta clara para o jogador
+    printf("\n➡️ Digite o número da cidade que você quer jogar (1 a %d): ", TOTAL_CIDADES);
+    scanf("%d", &escolhaJogador);
+    escolhaJogador--;
+
+    // Verifica se a escolha é válida
+    if (escolhaJogador < 0 || escolhaJogador >= TOTAL_CIDADES) {
+        printf("❌ Opção inválida.\n");
+        return 1;
+    }
+
+    // Computador escolhe uma carta aleatória diferente
+    escolhaComputador = rand() % TOTAL_CIDADES;
+    while (escolhaComputador == escolhaJogador) {
+        escolhaComputador = rand() % TOTAL_CIDADES;
+    }
+
+    Cidade cJogador = cidades[escolhaJogador];
+    Cidade cComp = cidades[escolhaComputador];
+
+    printf("\n🃏 Sua carta: %s (%s)\n", cJogador.nome, cJogador.estado);
+    printf("🤖 Carta do Computador: %s (%s)\n\n", cComp.nome, cComp.estado);
+
+    int atributoEscolhido;
+    float valorJogador, valorComputador;
+    char nomeAtributo[30];
+
+    // Menu interativo para o jogador escolher o atributo para comparação
+    printf("Escolha o atributo para comparar:\n");
+    mostrarAtributosDisponiveis();
+    printf("Digite o número do atributo: ");
+    scanf("%d", &atributoEscolhido);
+
+    if (atributoEscolhido < 1 || atributoEscolhido > TOTAL_ATRIBUTOS) {
+        printf("❌ Atributo inválido!\n");
+        return 1;
+    }
+
+    // Define os valores e nome do atributo para exibição
+    switch (atributoEscolhido) {
+        case 1:
+            valorJogador = (float)cJogador.populacao;
+            valorComputador = (float)cComp.populacao;
+            strcpy(nomeAtributo, "População");
+            break;
+        case 2:
+            valorJogador = cJogador.area;
+            valorComputador = cComp.area;
+            strcpy(nomeAtributo, "Área");
+            break;
+        case 3:
+            valorJogador = cJogador.pib;
+            valorComputador = cComp.pib;
+            strcpy(nomeAtributo, "PIB per capita");
+            break;
+        case 4:
+            valorJogador = (float)cJogador.pontosTuristicos;
+            valorComputador = (float)cComp.pontosTuristicos;
+            strcpy(nomeAtributo, "Pontos Turísticos");
+            break;
+        case 5:
+            valorJogador = cJogador.densidade;
+            valorComputador = cComp.densidade;
+            strcpy(nomeAtributo, "Densidade Demográfica");
+            break;
+        default:
+            printf("❌ Opção inválida!\n");
+            return 1;
+    }
+
+    // Mostra valores para comparação
+    printf("\nComparando atributo: %s\n", nomeAtributo);
+    printf("%s: %.2f\n", cJogador.nome, valorJogador);
+    printf("%s: %.2f\n\n", cComp.nome, valorComputador);
+
+    // Lógica de comparação com if-else aninhados
+    if (atributoEscolhido == 5) {  // Densidade demográfica: menor valor vence
+        if (valorJogador < valorComputador) {
+            printf("🏆 Resultado: Você venceu!\n");
+        } else if (valorJogador > valorComputador) {
+            printf("💥 Resultado: Você perdeu.\n");
+        } else {
+            printf("⚖️ Resultado: Empate!\n");
+        }
+    } else {  // Para os demais atributos: maior valor vence
+        if (valorJogador > valorComputador) {
+            printf("🏆 Resultado: Você venceu!\n");
+        } else if (valorJogador < valorComputador) {
+            printf("💥 Resultado: Você perdeu.\n");
+        } else {
+            printf("⚖️ Resultado: Empate!\n");
+        }
+    }
+
+    return 0;
+}
